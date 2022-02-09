@@ -1,0 +1,15 @@
+[features]
+seeds = false
+[programs.localnet]
+solana_sample = "GTuzvZ9JDQcvPhjAAehRJi72d68m9SqAHq8c6awLViYC"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+# change to your path...
+wallet = "/home/user/solana/keys/my-keys.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
