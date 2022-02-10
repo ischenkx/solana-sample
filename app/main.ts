@@ -10,6 +10,7 @@ async function main() {
         fs.readFileSync("target/idl/anchor_code.json", "utf8").toString()
     );
 
+
     const wallet = new anchor.Wallet(
         anchor.web3.Keypair.fromSecretKey(
             Buffer.from(
@@ -37,6 +38,10 @@ async function main() {
 
     let account: anchor.web3.Keypair = null
 
+    const evalContext = {
+        accountSize: 256
+    }
+
     console.log('use REPL to interact with solana (run \'HELP\' for more)')
 
     repl:while (true) {
@@ -47,9 +52,48 @@ async function main() {
             console.log('command is not provided...')
         }
 
+
         const command = parts[0].toUpperCase().trim()
         try {
             switch (command) {
+                case 'AIRDROP':
+                    await connection.requestAirdrop(
+                        seed2keypair(parts[1]).publicKey,
+                        parseInt(parts[2])
+                    )
+                    break
+                case 'PK':
+                    let seed = parts[1]
+                    console.log(seed2keypair(seed).publicKey.toBase58())
+                    break
+                case 'INFO':
+                    let kp = seed2keypair(parts[1])
+                    console.log(`requesting ${kp.publicKey.toBase58()}`)
+                    let info = await connection.getAccountInfo(
+                        kp.publicKey,
+                    )
+                    console.log(info)
+                    break
+
+                case 'TRANSFER':
+                    let from = seed2keypair(parts[1])
+                    let to = seed2keypair(parts[2])
+                    let amount = parseInt(parts[3])
+
+                    await program.rpc.transfer(new anchor.BN(amount), {
+                        accounts: {
+                            from: from.publicKey,
+                            to: to.publicKey,
+                            systemProgram: anchor.web3.SystemProgram.programId
+                        },
+                        signers: [from]
+                    })
+
+                    break
+                case 'EVAL':
+                    // @ts-ignore
+                    eval(parts.slice(1).join(' '))
+                    break
                 case 'HELP':
                     console.log('possible commands (case insensitive): HELP, LOAD, STORE <DATA>, HOLDER <SEED>')
                     break
@@ -85,10 +129,12 @@ async function main() {
                         console.log('error: incorrect command format (<HOLDER> expected)')
                         continue
                     }
-
                     account = seed2keypair(parts[1])
                     console.log('generated pubkey:', account.publicKey.toString())
-                    await program.rpc.create(wallet.publicKey, {
+                    await program.rpc.create(
+                        new anchor.BN(evalContext.accountSize ? evalContext.accountSize : 256),
+                        wallet.publicKey,
+                        {
                         accounts: {
                             dataHolder: account.publicKey,
                             owner: wallet.publicKey,
