@@ -95,7 +95,11 @@ async function main() {
                     eval(parts.slice(1).join(' '))
                     break
                 case 'HELP':
-                    console.log('possible commands (case insensitive): HELP, LOAD, STORE <DATA>, HOLDER <SEED>')
+                    console.log("possible commands (case insensitive): HELP, LOAD, STORE <DATA>, HOLDER <SEED>")
+                    console.log("\tEVAL <JS CODE>, AIRDROP <SEED>, PK <SEED>, INFO <SEED>, TRANSFER <FROM_SEED> <TO_SEED> <LAMPORTS>")
+                    console.log("Additional info:")
+                    console.log("EVAL can be used to execute JS code. Use 'evalContext' variable to save the state.")
+                    console.log("PK converts a seed to a public key")
                     break
                 case 'LOAD':
                     // load data
